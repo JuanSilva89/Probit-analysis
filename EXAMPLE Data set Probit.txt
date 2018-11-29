@@ -1,0 +1,9 @@
+insecticide	strain	dose	dead	total	date	color
+Kryptonite	SUPER	0	0	80	8/27/2016	1
+Kryptonite	SUPER	0.98	3	80	8/27/2016	1
+Kryptonite	SUPER	1.95	13	80	8/27/2016	1
+Kryptonite	SUPER	3.9	54	80	8/27/2016	1
+Kryptonite	SUPER	7.8	79	80	8/27/2016	1
+						
+						
+						
