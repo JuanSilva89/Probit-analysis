@@ -174,7 +174,7 @@ original.data
 
 output<-matrix(0,nrow = length(dataf$dose),ncol = 9)
 output<-cbind(dataf$dose,raw.abbott.correction,"",round(dataf$probit,digits = 3),dataf$total,dataf.output$dead,round(new.expected.mortality,digits = 3),"",round(chitt.output,digits = 3),extreme.values)
-colnames(output)<-c("Dose","Mort.Corr(%)","Probit","Total","Dead","Dead Expected","X2","Extreme values","","")
+colnames(output)<-c("Dose","Mort.Corr(%)","Probit","Total","Dead","Expected","X2","","","")
 output
 #This is the mortality corrected after optimization
 
@@ -225,12 +225,13 @@ write.table(format(eq.mat,digits = 3),append = T, exporttab, sep = "\t", col.nam
 write("", exporttab, append=T)
 write.table(format(chimatrix,digits = 3),append = T, exporttab, sep = "\t", col.names=F,row.names = F,quote=F)
 write("", exporttab, append=T)
-write("        Abbott", exporttab, append=T)
+write("        Abbott                                  Dead               ", exporttab, append=T)
 write.table(output,append = T, exporttab, sep = "\t", col.names=T,row.names = F,quote=F)
+write("", exporttab, append=T)
+write("Extreme values are marked with an asterisk (*)", exporttab, append=T)
 write("", exporttab, append=T)
 write("", exporttab, append=T)
 write("                Conf. Interv. 95%", exporttab, append=T)
 write.table(round(lcs,digits = 3),append = T, exporttab, sep = "\t", col.names=T,row.names = F,quote=F)
 
 remove(list=c("datac"))
-
