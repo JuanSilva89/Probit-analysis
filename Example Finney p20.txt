@@ -1,0 +1,11 @@
+insecticide	strain	dose	dead	total	date	color
+rotenone	M_sanborni	0	0	49	1/5/2021	1
+rotenone	M_sanborni	2.6	6	50	1/5/2021	1
+rotenone	M_sanborni	3.8	16	48	1/5/2021	1
+rotenone	M_sanborni	5.1	24	46	1/5/2021	1
+rotenone	M_sanborni	7.7	42	49	1/5/2021	1
+rotenone	M_sanborni	10.2	44	50	1/5/2021	1
+						
+						
+						
+						
