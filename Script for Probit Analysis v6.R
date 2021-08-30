@@ -81,7 +81,7 @@ probit<-(5+dataf$probmort)
 dataf<-cbind(dataf,probit) #add these probit values to dataframe
 
 
-# Abbott's correction (without optimization) to include in matrix output
+# Abbott's correction to include in matrix output
 # Calculation of the LC1, 5, 10, 50, 90, 95 and 99 and their corresponding 95% confidence intervals
 
 myprobit <- glm((dataf$mort) ~ log10(dataf$dose), family =quasibinomial(link = probit))
@@ -266,8 +266,7 @@ cmort.round<-round((datac$dead/datac$total)*100,digits = 3)
 control.mort<-paste("Control Mortality (%) =",cmort.round,"(",datac$dead,"/",datac$total,")",warn.control.mort)
 control.mort
 
-raw.abbott.correction<-round((dataf.output$mort-datac$mort)/(1-datac$mort)*100,digits=3) #Abbott correction without optimization to include in output file
-dataf$mort # Abbott's corrected percent mortality after optimization is applied (NOT INCLUDED IN THE OUTPUT FILE) 
+raw.abbott.correction<-round((dataf.output$mort-datac$mort)/(1-datac$mort)*100,digits=3) #Abbott correction included in output file
 
 # Warning message: No controls added
 if (min(data_raw$dose)>0) {control.mort<-c("*** PLEASE ADD CONTROLS ***")}
@@ -365,7 +364,6 @@ if(min(dataf.output$mort)<=datac$mort) {
   chimatrix<-cbind(chi.data,warn.message)
   chimatrix
 }
-
 
 if(min(dataf.output$mort)<=datac$mort) {
   lcs<-c(" ")
