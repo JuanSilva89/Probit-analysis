@@ -6,24 +6,27 @@
 
 
 # UPDATES:
-# Probit analysis is aborted when any dose has a percent mortality equal or lower than controls or 100% mortality  
+# Probit analysis is aborted when any dose has a percent mortality equal or lower than controls or 100% mortality.
 
-# This script now includes LC1 and LC99 in the output matrix
+# This script now includes LC1 and LC99 in the output matrix.
 
-# If input data contains 1 strain only, then the output is the summary of the probit analysis (text file)
+# If input data contains 1 strain only, then the output is the summary of the probit analysis (text file).
 
-# If input data contains >1 strain, then the output is a log-probit line (pdf) BUT NO summary of the probit analysis
+# If input data contains >1 strain, then the output is a log-probit line (pdf) BUT NO summary of the probit analysis is provided.
 
 # Current script does not depend on the MASS package to calculate lethal doses/concentrations. Instead, it calculates
-# the different parameters (calculated in line 92 through 148) used by Finney (weigthing coefficients, Z, NWX, NWY, etc).
+# the different parameters (calculated in line 92 through 148) used by Finney* (weigthing coefficients, Z, NWX, NWY, etc).
 # Although the previous parameters are not displayed in the output file of the probit analysis, the user
-# can inspect the parameters as stored in a matrix (please see lines 138 to 141).
+# can inspect the parameters as stored in a matrix (please see lines 138 to 141). 
+# We also recommend the user to refer to Example 1 data set table 3.1 from Finney's book (input dataset is also found in this GitHub repository as Example Finney p20.txt) and compare the parameters calculated in this script to those calculated by Finney on tables 3.3, 3.4 and 3.6.
+
+# *Calculations from this script are based from D.J. Finney's book: Probit Analysis. 1917, 3rd edition. Cambridge University Press.
 
 ### SELECT ALL THE SCRIPT BELOW TO RUN YOUR DATA
 entryf<-file.choose()
 
 dataf<-(read.table(entryf,header=T,stringsAsFactors=T)) # Added stringsAsFactors = T
-######## ############## This was the original mortality correction when 0% and 100% mortality were obtained  mort<-ifelse(dataf$dead/dataf$total==0,0.0006,ifelse(dataf$dead/dataf$total==1,1-0.0006,dataf$dead/dataf$total)) #calculate the mortality in each dose and replicate from the data
+###################### This was the original mortality correction when 0% and 100% mortality were obtained  mort<-ifelse(dataf$dead/dataf$total==0,0.0006,ifelse(dataf$dead/dataf$total==1,1-0.0006,dataf$dead/dataf$total)) #calculate the mortality in each dose and replicate from the data
 mort<-dataf$dead/dataf$total
 dataf<-cbind(dataf,mort) #add the mortality in the dataframe
 
@@ -109,7 +112,7 @@ Z<-(1/sqrt(2*Pi))*exp(-0.5*(Y-5)^2)
 Y0<-c(Y-P/Z)
 Y0
 
-# weighting is 1/Z according to Finney
+# Calculation the parameter (k) as 1/Z according to Finney
 k<-c(1/Z)/100
 k
 
@@ -140,7 +143,7 @@ probit.parameters<-cbind(X,Y,Z,Y0,k,Wt.coeff,NW,NWX,NWY,NWXY,NW*(X^2),(NW*X)^2)
 colnames(probit.parameters)<-c("X","Y","Z","Y0","k","Wt.coeff","NW","NWX","NWY","NWXY","NW(X^2)","(NWX)^2")
 probit.parameters
 
-## We now proceed to calculate the the parameters a and b from the linear regression (Y = aX + b)
+## We now proceed to calculate the parameters a and b from the linear regression (Y = aX + b)
 # Calculation of the slope (constant b)
 b<-(sum(NW)*sum(NWXY)-sum(NWX)*sum(NWY))/(sum(NW)*sum(NW*(X^2))-(sum(NW*X)^2))
 
@@ -150,18 +153,16 @@ a<- ((sum(NWY)/sum(NW))-(b*(sum(NWX)/sum(NW))))
 # Calculation of X.hat. This parameter is used to estimate the variance for each dose (e.g. see formula on line 169).
 X.hat<-sum(NWX)/sum(NW)
 
-# Convert 1% mortality into probit (e.g. 50% mortality equals to a probit of 5)
-probit_1<-round(qnorm(0.01)+5,digits = 3)
-
-logLC1<-((probit_1-a)/b)
-lc1<-10^c((probit_1-a)/b)
-# Alternatively, the LD1 can be calculated using the function:
+# Example of the conversion of 1% mortality into probit (e.g. 50% mortality equals to a probit of 5)
+Example_probit_1<-round(qnorm(0.01)+5,digits = 3)
+logLC1<-((Example_probit_1-a)/b)
+lc1<-10^c((Example_probit_1-a)/b)
 
 
 ############# Calculation of LDs for output file #################
 
 
-# Calculating LD5
+# Calculating LD1
 probit_1<-round(qnorm(0.01)+5,digits = 3) # Convert percent mortality into probit (e.g. 90% mortality is equivalent to a probit value of 7.326)
 logLC1<-((probit_1-a)/b)
 lc1<-10^c((probit_1-a)/b)
@@ -236,7 +237,6 @@ chitt<-round(chitt,digits = 3)
 chitt.output<-(X2)
 chi.sq<-pchisq(q=chitt,df=length(dataf$dead)-2,lower.tail=F)
 chis.sq.round<-round(chi.sq,digits = 3)
-
 chi.data<-paste("p(X2 =",chitt,",df = ",df=length(dataf$dead)-2,")=",chis.sq.round)
 chi.data
 
