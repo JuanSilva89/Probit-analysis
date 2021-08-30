@@ -256,9 +256,9 @@ main.info<-matrix(0,nrow = 3,ncol = 2)
 main.info<-cbind(names.strain.insecticide,byins.bystrain.bydate)
 main.info
 
-# Add a warning if control mortality exceeds 10%
-if(datac$mort*100>10){warn.control.mort<-c("WARNING: CONTROL MORTALITY EXCEEDING 10%")}
-if(datac$mort*100<10){warn.control.mort<-c(" ")}
+# Add a warning if control mortality exceeds 20%
+if(datac$mort*100>20){warn.control.mort<-c("WARNING: CONTROL MORTALITY EXCEEDING 20%")}
+if(datac$mort*100<20){warn.control.mort<-c(" ")}
 warn.control.mort
 
 control.mort<-matrix(0,nrow=1,ncol=2)
