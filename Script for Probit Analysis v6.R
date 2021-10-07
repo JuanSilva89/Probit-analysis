@@ -1,4 +1,3 @@
-
 ### Script version 6
 # Script implemented using 
 # RStudio Version 1.2.5033 
@@ -226,6 +225,9 @@ Sm.LC99<- sqrt(Variance.logLC99) # Standard error calculated using equation 3.13
 lc99up <-10^c(logLC99 + c(1.96) * Sm.LC99) # Value of the upper 95% confidence interval
 lc99low <-10^c(logLC99 + c(-1.96) * Sm.LC99) # Value of the lower 95% confidence interval
 
+total.tested<-paste("Total number of individuals tested =",sum(N))
+
+
 r<-dataf.output$dead #dead observed
 nP<-new.expected.mortality #dead expected
 P<-pnorm(Y-5) #proportion of dead observed  
@@ -294,10 +296,10 @@ original.data
 
 if(min(dataf.output$mort)<=datac$mort) {
   output<-c(" ")
-
+  
 } else if (max(dataf.output$mort)==1) {
   output<-c(" ")
-
+  
 } else {  
   output<-matrix(0,nrow = length(dataf$dose),ncol = 9)
   output<-cbind(dataf$dose,raw.abbott.correction,"",round(dataf$probit,digits = 3),dataf$total,dataf.output$dead,round(new.expected.mortality,digits = 3),"",round(chitt.output,digits = 3),extreme.values)
@@ -394,9 +396,8 @@ if(length(strains)==1) {
   exporttab<-gsub(".txt","=Results.txt",entryf)
   write("                   SCOTT LAB - PROBIT ANALYSIS", exporttab)
   write("", exporttab, append=T)
-  write("Script version: v5", exporttab, append=T)
+  write("Script version: v6", exporttab, append=T)
   write.table(main.info, exporttab, sep = "\t", col.names=F,row.names = F,quote=F,append = T)
-  write("", exporttab, append=T)
   write("", exporttab, append=T)
   write.table(control.mort,append = T ,exporttab, sep = "\t", col.names=F,row.names = F,quote=F)
   write("", exporttab, append=T)
@@ -404,6 +405,7 @@ if(length(strains)==1) {
   write("", exporttab, append=T)
   write.table(original.data,append = T ,exporttab, sep = "\t", col.names=T,row.names = F,quote=F)
   write("", exporttab, append=T)
+  write(total.tested, exporttab, append=T)
   write("", exporttab, append=T)
   write.table(round(probit.line.summary,digits = 3),append = T ,exporttab, sep = "\t", col.names=T,row.names = F,quote=F)
   write("", exporttab, append =T)
@@ -419,7 +421,7 @@ if(length(strains)==1) {
   write("", exporttab, append=T)
   write("                Conf. Interv. 95%", exporttab, append=T)
   write.table(round(lcs,digits = 3),append = T, exporttab, sep = "\t", col.names=T,row.names = F,quote=F)
- 
+  
 } else {
   no.export<-vector() # If there are more than one strains then no probit output (.txt) is created
 } 
@@ -431,98 +433,98 @@ if(length(strains)==1) {
 
 if(length(strains)>1) {
   
-# assign a color to the different strains
-if (length(strains)>10) palette(rainbow(length(strains))) else if (length(strains)>1) palette(rainbow(10)) 
-if (is.null(dataf$color)==T) {
-  color<-1:length(strain)
-  dataf<-cbind(dataf,color)
+  # assign a color to the different strains
+  if (length(strains)>10) palette(rainbow(length(strains))) else if (length(strains)>1) palette(rainbow(10)) 
+  if (is.null(dataf$color)==T) {
+    color<-1:length(strain)
+    dataf<-cbind(dataf,color)
+    for (i in 1:length(strains)) {
+      ii<-strain == strains[i]
+      dataf$color[ii]<-i} # assign the color arbitrarily if the user did not provide any indication
+  }
+  colstrains<-1:length(strains)
   for (i in 1:length(strains)) {
     ii<-strain == strains[i]
-    dataf$color[ii]<-i} # assign the color arbitrarily if the user did not provide any indication
-}
-colstrains<-1:length(strains)
-for (i in 1:length(strains)) {
-  ii<-strain == strains[i]
-  colstrains[i]<-dataf$color[ii][1]}
-
-
-if (is.null(dataf$symbol)==T) {
-  symbol<-1:length(strain)
-  dataf<-cbind(dataf,symbol)
+    colstrains[i]<-dataf$color[ii][1]}
+  
+  
+  if (is.null(dataf$symbol)==T) {
+    symbol<-1:length(strain)
+    dataf<-cbind(dataf,symbol)
+    for (i in 1:length(strains)) {
+      ii<-strain == strains[i]
+      dataf$symbol[ii]<-i} # assign the data point symbol arbitrarily if the user did not provide any indication
+  }
+  symstrains<-1:length(strains)
   for (i in 1:length(strains)) {
     ii<-strain == strains[i]
-    dataf$symbol[ii]<-i} # assign the data point symbol arbitrarily if the user did not provide any indication
-}
-symstrains<-1:length(strains)
-for (i in 1:length(strains)) {
-  ii<-strain == strains[i]
-  symstrains[i]<-dataf$symbol[ii][1]}
-
-dmin<-floor(log10(min(dose))) # determines the graph upper and lower log doses, from the data provided
-dmax<-ceiling(log10(max(dose))) 
-dose_min<- 10^(dmin) # lower log dose transformed to dose
-dose_max<- 10^(dmax) # upper log dose transformed to dose
-pmort_min<- qnorm(0.006)+5 # probability of minimal dose transformed to probit
-pmort_max<- qnorm(1-0.006)+5 # probability of maximal dose transformed to probit
-
-CIplot<-function(model){sum<-summary(model) #function to calculate the CI of the regressions for each strain
-a<-sum$coefficient[1]+5    # model intercept
-b<-sum$coefficient[2]      # model slope
-minldose<-((pmort_min-a)/b) # predicted log(dose) for 0% mortality
-maxldose<-((pmort_max-a)/b) # predicted log(dose) for 100% mortality
-datalfit<-seq(minldose-0.2,maxldose+0.2,by=0.0153) # generates a set of log doses
-datafit<-10^datalfit# transform log doses into doses
-mortality_fit<-seq(0.0006,1-0.0006,0.01)# generates a set of mortality
-probitfit<-qnorm(mortality_fit)+5 # transforms mortality into probits
-pred_logLC <- ((probitfit-a)/b) # predicted log-probit line
-pred_LC<-10^pred_logLC
-pred.Variance.logLC <- 1/b^2 * { 1/(sum(NW)) + ((pred_logLC-X.hat)^2 /(sum(NW*(X^2))-sum(NWX)^2/sum(NW))) } # Variance calculated as in equation 3.12 from Finney's book
-pred_Sm.LC<- sqrt(pred.Variance.logLC) # Standard error calculated using equation 3.13 from Finney's book
-pred_lc_CI_up <-10^c(pred_logLC + c(1.96) * pred_Sm.LC)
-pred_lc_CI_low <-10^c(pred_logLC + c(-1.96) * pred_Sm.LC)
-dose_ci<-cbind(probitfit,pred_lc_CI_low,pred_lc_CI_up) # creat a matrix with predicted probit (X-axis) and 95% CI (Y-axis) to be plotted
-return(dose_ci)
-}
-
-# build the graph in a pdf file with confidence intervals
-exportgraph<-gsub(".txt","=PLOT.pdf",entryf) # create the pdf file from the original data file
-pdf(exportgraph)
-
-ii<-strain == strains[1] #plots the data points for the first strain
-plot((dose[ii]),probit[ii],log = "x",xlim=c(dose_min,dose_max),ylim=c(floor(pmort_min),ceiling(pmort_max)),ylab="mortalit?",yaxt="n",xaxt="n", ann=FALSE ,col=colstrains[1],pch=symstrains[1])
-for (i in 2:length(strains)) { 
-  ii<-strain == strains[i]
-  points(dose[ii],probit[ii],col=colstrains[i],pch=symstrains[i]) }  #plots the data points for the other strains 
-for (i in 1:length(strains)) { # Compute the probit regression for each strain
- locdata<-dataf[strain == strains[i],]
- myprobit_per_strain <- glm(mort ~ log10(dose),data = locdata, family =quasibinomial(link = probit))
- CIfit<-CIplot(myprobit_per_strain) #plots the CI of the regressions for each strain
-  lines(CIfit[,2],CIfit[,1],type="l", lty=3, col=colstrains[i])  # plots the lower 95% CI
-  lines(CIfit[,3],CIfit[,1],type="l", lty=3, col=colstrains[i])# plots the upper 95% CI
-  myprobit_per_strain$coefficients[1] <-myprobit_per_strain$coefficients[1]+5 # Add 5 to the intercept
-abline(myprobit_per_strain, col=colstrains[i])  #plots the regressions for each strain
-}
-
-
-# graph format
-#labels the y axis in probit scale
-labely<-c(1,5,seq(10,90,10),95,99) 
-axis(2, at=5+qnorm(labely/100),labels=labely,las=2, adj=0) # converts percent mortality into probit 
-mtext("Mortality (%)", side=2, line=3)
-
-
-#labels the x axis 
-for (i in dmin:dmax) axis(1,at=10 ^i,labels=substitute(10^k,list(k=i))) 
-axis.at <- 10 ^c(dmin:dmax)
-axis(1, at = 2:9 * rep(axis.at[-1]/10, each = 8),
-     tcl = -0.5, labels = FALSE)                   
-mtext(expression( Log ( dose ("ng per individual")) ), side=1, line=3) 
-
-# creates a legend for the graph
-legend(dose_min, 7.5, strains, col = colstrains, pch=symstrains, cex = 0.8)
-
+    symstrains[i]<-dataf$symbol[ii][1]}
+  
+  dmin<-floor(log10(min(dose))) # determines the graph upper and lower log doses, from the data provided
+  dmax<-ceiling(log10(max(dose))) 
+  dose_min<- 10^(dmin) # lower log dose transformed to dose
+  dose_max<- 10^(dmax) # upper log dose transformed to dose
+  pmort_min<- qnorm(0.006)+5 # probability of minimal dose transformed to probit
+  pmort_max<- qnorm(1-0.006)+5 # probability of maximal dose transformed to probit
+  
+  CIplot<-function(model){sum<-summary(model) #function to calculate the CI of the regressions for each strain
+  a<-sum$coefficient[1]+5    # model intercept
+  b<-sum$coefficient[2]      # model slope
+  minldose<-((pmort_min-a)/b) # predicted log(dose) for 0% mortality
+  maxldose<-((pmort_max-a)/b) # predicted log(dose) for 100% mortality
+  datalfit<-seq(minldose-0.2,maxldose+0.2,by=0.0153) # generates a set of log doses
+  datafit<-10^datalfit# transform log doses into doses
+  mortality_fit<-seq(0.0006,1-0.0006,0.01)# generates a set of mortality
+  probitfit<-qnorm(mortality_fit)+5 # transforms mortality into probits
+  pred_logLC <- ((probitfit-a)/b) # predicted log-probit line
+  pred_LC<-10^pred_logLC
+  pred.Variance.logLC <- 1/b^2 * { 1/(sum(NW)) + ((pred_logLC-X.hat)^2 /(sum(NW*(X^2))-sum(NWX)^2/sum(NW))) } # Variance calculated as in equation 3.12 from Finney's book
+  pred_Sm.LC<- sqrt(pred.Variance.logLC) # Standard error calculated using equation 3.13 from Finney's book
+  pred_lc_CI_up <-10^c(pred_logLC + c(1.96) * pred_Sm.LC)
+  pred_lc_CI_low <-10^c(pred_logLC + c(-1.96) * pred_Sm.LC)
+  dose_ci<-cbind(probitfit,pred_lc_CI_low,pred_lc_CI_up) # creat a matrix with predicted probit (X-axis) and 95% CI (Y-axis) to be plotted
+  return(dose_ci)
+  }
+  
+  # build the graph in a pdf file with confidence intervals
+  exportgraph<-gsub(".txt","=PLOT.pdf",entryf) # create the pdf file from the original data file
+  pdf(exportgraph)
+  
+  ii<-strain == strains[1] #plots the data points for the first strain
+  plot((dose[ii]),probit[ii],log = "x",xlim=c(dose_min,dose_max),ylim=c(floor(pmort_min),ceiling(pmort_max)),ylab="mortalit?",yaxt="n",xaxt="n", ann=FALSE ,col=colstrains[1],pch=symstrains[1])
+  for (i in 2:length(strains)) { 
+    ii<-strain == strains[i]
+    points(dose[ii],probit[ii],col=colstrains[i],pch=symstrains[i]) }  #plots the data points for the other strains 
+  for (i in 1:length(strains)) { # Compute the probit regression for each strain
+    locdata<-dataf[strain == strains[i],]
+    myprobit_per_strain <- glm(mort ~ log10(dose),data = locdata, family =quasibinomial(link = probit))
+    CIfit<-CIplot(myprobit_per_strain) #plots the CI of the regressions for each strain
+    lines(CIfit[,2],CIfit[,1],type="l", lty=3, col=colstrains[i])  # plots the lower 95% CI
+    lines(CIfit[,3],CIfit[,1],type="l", lty=3, col=colstrains[i])# plots the upper 95% CI
+    myprobit_per_strain$coefficients[1] <-myprobit_per_strain$coefficients[1]+5 # Add 5 to the intercept
+    abline(myprobit_per_strain, col=colstrains[i])  #plots the regressions for each strain
+  }
+  
+  
+  # graph format
+  #labels the y axis in probit scale
+  labely<-c(1,5,seq(10,90,10),95,99) 
+  axis(2, at=5+qnorm(labely/100),labels=labely,las=2, adj=0) # converts percent mortality into probit 
+  mtext("Mortality (%)", side=2, line=3)
+  
+  
+  #labels the x axis 
+  for (i in dmin:dmax) axis(1,at=10 ^i,labels=substitute(10^k,list(k=i))) 
+  axis.at <- 10 ^c(dmin:dmax)
+  axis(1, at = 2:9 * rep(axis.at[-1]/10, each = 8),
+       tcl = -0.5, labels = FALSE)                   
+  mtext(expression( Log ( dose ("ng per individual")) ), side=1, line=3) 
+  
+  # creates a legend for the graph
+  legend(dose_min, 7.5, strains, col = colstrains, pch=symstrains, cex = 0.8)
+  
 } else {
-no.export.graph<-vector() # If there is one strain only then no graph (.pdf) is created 
+  no.export.graph<-vector() # If there is one strain only then no graph (.pdf) is created 
 }
 
 remove(list=c("datac"))
@@ -547,5 +549,3 @@ dev.off()
 # Equation line:  Y = 2.134 + 4.176 * X
 # X2 weight:      1.671
 # LD50 (CI 95%):  4.85 (4.38 - 5.36) 
-
-
