@@ -1,4 +1,4 @@
-### Script version 6
+### Script version 6.1
 # Script implemented using 
 # RStudio Version 1.2.5033 
 # R version 3.6.3 (2021-08-18)
@@ -396,7 +396,7 @@ if(length(strains)==1) {
   exporttab<-gsub(".txt","=Results.txt",entryf)
   write("                   SCOTT LAB - PROBIT ANALYSIS", exporttab)
   write("", exporttab, append=T)
-  write("Script version: v6", exporttab, append=T)
+  write("Script version: v6.1", exporttab, append=T)
   write.table(main.info, exporttab, sep = "\t", col.names=F,row.names = F,quote=F,append = T)
   write("", exporttab, append=T)
   write.table(control.mort,append = T ,exporttab, sep = "\t", col.names=F,row.names = F,quote=F)
